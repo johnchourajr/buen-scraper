@@ -14,7 +14,7 @@ To get API access:
 ### Endpoint
 
 ```
-GET /api/scrape/{encodedUrl}
+GET https://scraper.muybuen.dev/api/scrape/{encodedUrl}
 ```
 
 ### Headers
@@ -30,7 +30,7 @@ GET /api/scrape/{encodedUrl}
 
 ```bash
 curl -X GET \
-  'https://your-domain.com/api/scrape/https%3A%2F%2Fexample.com?selector=%23main-content' \
+  'https://scraper.muybuen.dev/api/scrape/https%3A%2F%2Fexample.com?selector=%23main-content' \
   -H 'x-api-key: your-api-key'
 ```
 

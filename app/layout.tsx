@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://scraper.muybuen.dev"),
   title: "Buen Scraper",
   description: "An API to Scrape the internet",
 };
