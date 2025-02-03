@@ -14,7 +14,7 @@ type ScrapeResult = {
 
 export default function Home() {
   const [url, setUrl] = useState<string>('');
-  const [selector, setSelector] = useState<string>('#storefront-container > div > div:nth-child(2)');
+  const [selector, setSelector] = useState<string>('');
   const [results, setResults] = useState<ScrapeResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -22,6 +22,30 @@ export default function Home() {
   const [status, setStatus] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlParam = params.get('url');
+    const selectorParam = params.get('selector');
+
+    if (urlParam) {
+      try {
+        const decodedUrl = decodeURIComponent(urlParam);
+        setUrl(decodedUrl);
+      } catch (e) {
+        console.error('Failed to decode URL parameter:', e);
+      }
+    }
+
+    if (selectorParam) {
+      try {
+        const decodedSelector = decodeURIComponent(selectorParam);
+        setSelector(decodedSelector);
+      } catch (e) {
+        console.error('Failed to decode selector parameter:', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -40,6 +64,12 @@ export default function Home() {
     setStatus('Initializing...');
     setStartTime(Date.now());
     setResults(null);
+
+    // Update URL with current parameters without reloading
+    const params = new URLSearchParams();
+    if (url) params.set('url', url);
+    if (selector) params.set('selector', selector);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
 
     try {
       const encodedUrl = encodeURIComponent(url.trim());
@@ -88,7 +118,7 @@ export default function Home() {
             type="text"
             value={selector}
             onChange={(e) => setSelector(e.target.value)}
-            placeholder="Enter CSS selector"
+            placeholder="Enter CSS selector (optional)"
             className="w-full p-2 border text-black rounded"
           />
           <button

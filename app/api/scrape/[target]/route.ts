@@ -64,6 +64,19 @@ type ScrapeResult = {
   error?: string;
 };
 
+// Add CORS headers helper
+function addCorsHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  return response;
+}
+
+// Handle OPTIONS requests for CORS
+export async function OPTIONS() {
+  return addCorsHeaders(new NextResponse(null, { status: 200 }));
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ target: string }> }
@@ -73,10 +86,10 @@ export async function GET(
   const validKey = process.env.NEXT_PUBLIC_BUEN_SCRAPER_API_KEY;
 
   if (!apiKey || apiKey !== validKey) {
-    return NextResponse.json(
+    return addCorsHeaders(NextResponse.json(
       { error: 'Unauthorized - Invalid API key' },
       { status: 401 }
-    );
+    ));
   }
 
   const startTime = Date.now();
@@ -193,7 +206,7 @@ export async function GET(
     const duration = Date.now() - startTime;
     console.log(`[Status] Scraping successful (${duration}ms)`);
 
-    return NextResponse.json(
+    return addCorsHeaders(NextResponse.json(
       { ...scrapedData, duration, timestamp: new Date().toISOString() } as ScrapeResult,
       {
         status: 200,
@@ -202,14 +215,14 @@ export async function GET(
           'Cache-Control': 'no-store',
         },
       }
-    );
+    ));
   } catch (error: unknown) {
     console.error('Detailed scraping error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
 
-    return NextResponse.json(
+    return addCorsHeaders(NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
       {
         status: 500,
@@ -217,7 +230,7 @@ export async function GET(
           'Content-Type': 'application/json',
         },
       }
-    );
+    ));
   } finally {
     if (page || browser) {
       console.log('Cleaning up browser session...');
