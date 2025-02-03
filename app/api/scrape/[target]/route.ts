@@ -171,7 +171,13 @@ export async function GET(
 
         const targetElement = document.querySelector(selector);
         if (!targetElement) {
-          return { error: `Element not found: ${selector}` };
+          return {
+            url: window.location.href,
+            title: document.title,
+            targetSelector: selector,
+            content: null,
+            error: `Element not found: ${selector}`
+          };
         }
 
         return {
