@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -8,17 +8,34 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [debugUrl, setDebugUrl] = useState('');
+  const [status, setStatus] = useState('');
+  const [duration, setDuration] = useState(0);
+  const [startTime, setStartTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (loading && startTime) {
+      intervalId = setInterval(() => {
+        setDuration(Date.now() - startTime);
+      }, 100);
+    }
+    return () => clearInterval(intervalId);
+  }, [loading, startTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setStatus('Initializing...');
+    setStartTime(Date.now());
+    setResults(null);
 
     try {
       const encodedUrl = encodeURIComponent(url.trim());
       const encodedSelector = encodeURIComponent(selector.trim());
       const apiUrl = `/api/scrape/${encodedUrl}?selector=${encodedSelector}`;
       setDebugUrl(apiUrl);
+
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
@@ -32,10 +49,13 @@ export default function Home() {
 
       const data = await response.json();
       setResults(data);
+      setStatus('Complete');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch results');
+      setStatus('Failed');
     } finally {
       setLoading(false);
+      setStartTime(null);
     }
   };
 
@@ -68,6 +88,17 @@ export default function Home() {
             {loading ? 'Scraping...' : 'Scrape URL'}
           </button>
         </form>
+
+        {(loading || status) && (
+          <div className="w-full p-4 bg-gray-100 text-black rounded">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">{status}</span>
+              <span className="font-mono">
+                {(duration / 1000).toFixed(1)}s
+              </span>
+            </div>
+          </div>
+        )}
 
         {debugUrl && (
           <div className="w-full p-4 bg-gray-100 rounded text-sm font-mono break-all text-gray-500">

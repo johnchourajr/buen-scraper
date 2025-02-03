@@ -44,6 +44,15 @@ async function createBrowserAndPage() {
   return { browser, page };
 }
 
+async function waitForSelector(page, selector: string, timeout = 10000) {
+  try {
+    await page.waitForSelector(selector, { timeout });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ target: string }> }
@@ -59,6 +68,7 @@ export async function GET(
     );
   }
 
+  const startTime = Date.now();
   let browser = null;
   let page = null;
 
@@ -73,12 +83,12 @@ export async function GET(
       throw new Error('Invalid URL protocol. Must be http or https.');
     }
 
-    console.log('Starting browser session...');
+    console.log('[Status] Starting browser session...');
     const session = await createBrowserAndPage();
     browser = session.browser;
     page = session.page;
 
-    console.log(`Navigating to ${targetUrl}...`);
+    console.log(`[Status] Navigating to ${targetUrl}...`);
     const response = await page.goto(targetUrl, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
@@ -88,10 +98,16 @@ export async function GET(
       throw new Error(`Failed to load page: ${response?.status()}`);
     }
 
+    console.log('[Status] Waiting for selector...');
+    const selectorFound = await waitForSelector(page, selector);
+    if (!selectorFound) {
+      throw new Error(`Selector not found: ${selector}`);
+    }
+
     // Additional wait after navigation
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    console.log('Evaluating page content...');
+    console.log('[Status] Evaluating page content...');
     const scrapedData = await page.evaluate(
       (selector: string): unknown => {
         const getSectionContent = (element: Element): Content => {
@@ -157,14 +173,19 @@ export async function GET(
       selector
     );
 
-    console.log('Scraping successful');
-    return NextResponse.json(scrapedData, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
-    });
+    const duration = Date.now() - startTime;
+    console.log(`[Status] Scraping successful (${duration}ms)`);
+
+    return NextResponse.json(
+      { ...scrapedData, duration, timestamp: new Date().toISOString() },
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error: unknown) {
     console.error('Detailed scraping error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
