@@ -17,6 +17,8 @@ To get API access:
 GET https://scraper.muybuen.dev/api/scrape/{encodedUrl}
 ```
 
+
+
 ### Headers
 
 - `x-api-key`: Your API key (required)
