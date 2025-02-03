@@ -6,7 +6,9 @@
   node_bundler = "esbuild"
   included_files = ["node_modules/@sparticuz/chromium-*/**"]
   external_node_modules = ["@sparticuz/chromium"]
-  memory = 3008
+
+[functions.api]
+  memory_size = 3008
   timeout = 30
 
 [[plugins]]
