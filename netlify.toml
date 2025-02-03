@@ -18,9 +18,3 @@
   NODE_VERSION = "18"
   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
   CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
