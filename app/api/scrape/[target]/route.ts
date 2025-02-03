@@ -1,7 +1,7 @@
 // app/api/scrape/[target]/route.ts
 import chromium from '@sparticuz/chromium';
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
+import puppeteer, { Page } from 'puppeteer-core';
 
 type Content =
   | {
@@ -44,14 +44,25 @@ async function createBrowserAndPage() {
   return { browser, page };
 }
 
-async function waitForSelector(page, selector: string, timeout = 10000) {
+async function waitForSelector(page: Page, selector: string, timeout = 10000): Promise<boolean> {
   try {
     await page.waitForSelector(selector, { timeout });
     return true;
   } catch (error) {
+    console.error(`Selector "${selector}" not found within ${timeout}ms`, error);
     return false;
   }
 }
+
+type ScrapeResult = {
+  url: string;
+  title: string;
+  targetSelector: string;
+  content: Content;
+  duration?: number;
+  timestamp?: string;
+  error?: string;
+};
 
 export async function GET(
   request: NextRequest,
@@ -109,7 +120,7 @@ export async function GET(
 
     console.log('[Status] Evaluating page content...');
     const scrapedData = await page.evaluate(
-      (selector: string): unknown => {
+      (selector: string): ScrapeResult => {
         const getSectionContent = (element: Element): Content => {
           // Skip if element is SVG.
           if (element instanceof SVGElement) {
@@ -177,7 +188,7 @@ export async function GET(
     console.log(`[Status] Scraping successful (${duration}ms)`);
 
     return NextResponse.json(
-      { ...scrapedData, duration, timestamp: new Date().toISOString() },
+      { ...scrapedData, duration, timestamp: new Date().toISOString() } as ScrapeResult,
       {
         status: 200,
         headers: {

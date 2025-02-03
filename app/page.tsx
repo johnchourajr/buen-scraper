@@ -1,15 +1,26 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+type ScrapeResult = {
+  url: string;
+  title: string;
+  targetSelector: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: any; // You can make this more specific if needed
+  duration?: number;
+  timestamp?: string;
+  error?: string;
+};
+
 export default function Home() {
-  const [url, setUrl] = useState('');
-  const [selector, setSelector] = useState('#storefront-container > div > div:nth-child(2)');
-  const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [debugUrl, setDebugUrl] = useState('');
-  const [status, setStatus] = useState('');
-  const [duration, setDuration] = useState(0);
+  const [url, setUrl] = useState<string>('');
+  const [selector, setSelector] = useState<string>('#storefront-container > div > div:nth-child(2)');
+  const [results, setResults] = useState<ScrapeResult | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [debugUrl, setDebugUrl] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+  const [duration, setDuration] = useState<number>(0);
   const [startTime, setStartTime] = useState<number | null>(null);
 
   useEffect(() => {
@@ -85,11 +96,14 @@ export default function Home() {
             disabled={loading}
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
           >
-            {loading ? 'Scraping...' : 'Scrape URL'}
+            {loading ? status : 'Scrape URL'}
+            {loading && <span className="font-mono">
+                {(duration / 1000).toFixed(1)}s
+              </span>}
           </button>
         </form>
 
-        {(loading || status) && (
+        {(status === 'Complete') && (
           <div className="w-full p-4 bg-gray-100 text-black rounded">
             <div className="flex justify-between items-center">
               <span className="font-semibold">{status}</span>
