@@ -16,6 +16,17 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ target: string }> }
 ): Promise<Response> {
+  // API Key validation
+  const apiKey = request.headers.get('x-api-key');
+  const validKey = process.env.NEXT_PUBLIC_BUEN_SCRAPER_API_KEY;
+
+  if (!apiKey || apiKey !== validKey) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Invalid API key' },
+      { status: 401 }
+    );
+  }
+
   let browser: Browser | null = null;
 
   try {

@@ -20,7 +20,10 @@ export default function Home() {
       const apiUrl = `/api/scrape/${encodedUrl}?selector=${encodedSelector}`;
       setDebugUrl(apiUrl);
       const response = await fetch(apiUrl, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          'x-api-key': process.env.NEXT_PUBLIC_BUEN_SCRAPER_API_KEY || ''
+        }
       });
 
       if (!response.ok) {

@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Buen Scraper API
 
-## Getting Started
+A web scraping API that allows you to extract content from web pages using CSS selectors.
 
-First, run the development server:
+## Access
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+To get API access:
+1. Email hi@john.design for an API key
+2. Include your use case and expected request volume
+3. We'll respond with your API key and rate limit details
+
+## API Reference
+
+### Endpoint
+
+```
+GET /api/scrape/{encodedUrl}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Headers
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `x-api-key`: Your API key (required)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### URL Parameters
 
-## Learn More
+- `encodedUrl`: The URL-encoded target website URL
+- `selector`: (optional) CSS selector to target specific elements. Defaults to 'body'
 
-To learn more about Next.js, take a look at the following resources:
+### Example Request
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+curl -X GET \
+  'https://your-domain.com/api/scrape/https%3A%2F%2Fexample.com?selector=%23main-content' \
+  -H 'x-api-key: your-api-key'
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Response Format
 
-## Deploy on Vercel
+```json
+{
+  "url": "https://example.com",
+  "title": "Page Title",
+  "targetSelector": "#main-content",
+  "content": {
+    "tag": "div",
+    "text": "Content text",
+    "attributes": {
+      "id": "main-content",
+      "class": "container"
+    },
+    "children": [
+      // Nested elements
+    ]
+  }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Error Responses
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `401`: Invalid or missing API key
+- `400`: Invalid URL or parameters
+- `500`: Server error or scraping failed
+
+## Rate Limiting
+
+Contact hi@john.design for rate limit information and custom quota requests.
+
+## Best Practices
+
+1. URL encode your target URLs
+2. Use specific CSS selectors to minimize response size
+3. Handle rate limits and errors gracefully
+4. Cache responses when possible
+
+## Support
+
+For support or questions, email hi@john.design
