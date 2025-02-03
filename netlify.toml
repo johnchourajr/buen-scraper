@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["node_modules/@sparticuz/chromium-*/**"]
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "18"
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+  CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"

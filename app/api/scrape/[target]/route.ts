@@ -1,6 +1,7 @@
 // app/api/scrape/[target]/route.ts
+import chromium from '@sparticuz/chromium';
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer, { Browser } from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 
 type Content =
   | {
@@ -13,6 +14,35 @@ type Content =
       children: Content[];
     }
   | null;
+
+const isDev = process.env.NODE_ENV === 'development';
+
+async function createBrowserAndPage() {
+  const browser = await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--single-process',
+    ],
+    defaultViewport: {
+      width: 1280,
+      height: 720,
+      deviceScaleFactor: 1,
+    },
+    executablePath: isDev
+      ? process.env.CHROME_PATH
+      : await chromium.executablePath(),
+    headless: true,
+    ignoreHTTPSErrors: true,
+  });
+
+  const page = await browser.newPage();
+  await page.setDefaultNavigationTimeout(30000);
+  await page.setDefaultTimeout(30000);
+
+  return { browser, page };
+}
 
 export async function GET(
   request: NextRequest,
@@ -29,7 +59,8 @@ export async function GET(
     );
   }
 
-  let browser: Browser | null = null;
+  let browser = null;
+  let page = null;
 
   try {
     const { target } = await context.params;
@@ -42,28 +73,23 @@ export async function GET(
       throw new Error('Invalid URL protocol. Must be http or https.');
     }
 
-    console.log('Launching browser...');
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-      ]
-    });
-
-    console.log('Creating new page...');
-    const page = await browser.newPage();
-
-    // Set navigation and general timeouts.
-    page.setDefaultNavigationTimeout(30000);
-    page.setDefaultTimeout(30000);
+    console.log('Starting browser session...');
+    const session = await createBrowserAndPage();
+    browser = session.browser;
+    page = session.page;
 
     console.log(`Navigating to ${targetUrl}...`);
-    await page.goto(targetUrl, {
-      waitUntil: 'networkidle2',
+    const response = await page.goto(targetUrl, {
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
+
+    if (!response?.ok()) {
+      throw new Error(`Failed to load page: ${response?.status()}`);
+    }
+
+    // Additional wait after navigation
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log('Evaluating page content...');
     const scrapedData = await page.evaluate(
@@ -155,9 +181,14 @@ export async function GET(
       }
     );
   } finally {
-    if (browser) {
-      console.log('Closing browser...');
-      await browser.close();
+    if (page || browser) {
+      console.log('Cleaning up browser session...');
+      try {
+        if (page) await page.close().catch(() => {});
+        if (browser) await browser.close().catch(() => {});
+      } catch (error) {
+        console.error('Error during cleanup:', error);
+      }
     }
   }
 }
