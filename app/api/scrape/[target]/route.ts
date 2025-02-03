@@ -82,15 +82,15 @@ export async function GET(
   context: { params: Promise<{ target: string }> }
 ): Promise<Response> {
   // API Key validation
-  const apiKey = request.headers.get('x-api-key');
-  const validKey = process.env.NEXT_PUBLIC_BUEN_SCRAPER_API_KEY;
+  // const apiKey = request.headers.get('x-api-key');
+  // const validKey = process.env.NEXT_PUBLIC_BUEN_SCRAPER_API_KEY;
 
-  if (!apiKey || apiKey !== validKey) {
-    return addCorsHeaders(NextResponse.json(
-      { error: 'Unauthorized - Invalid API key' },
-      { status: 401 }
-    ));
-  }
+  // if (!apiKey || apiKey !== validKey) {
+  //   return addCorsHeaders(NextResponse.json(
+  //     { error: 'Unauthorized - Invalid API key' },
+  //     { status: 401 }
+  //   ));
+  // }
 
   const startTime = Date.now();
   let browser = null;
