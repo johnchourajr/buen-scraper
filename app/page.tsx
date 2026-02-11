@@ -133,7 +133,7 @@ export default function Home() {
           <h1 className="font-sans uppercase tracking-wider text-foreground">
             @muybuen/scraper
           </h1>
-          <p className="text-sm text-foreground/70">
+          <p className="font-sans text-foreground/70">
             An API to scrape the internet. Enter a URL and optional CSS
             selector.
           </p>
