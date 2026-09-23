@@ -1,6 +1,6 @@
-import { SVGProps } from "react";
+import type { SVGProps } from "react";
 
-interface Props extends SVGProps<SVGSVGElement> {}
+type Props = SVGProps<SVGSVGElement>;
 
 const SvgFavicon = (props: Props) => (
   <svg
