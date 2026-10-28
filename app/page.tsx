@@ -131,7 +131,7 @@ export default function Home() {
       <main className="w-full max-w-xl space-y-10">
         <header className="space-y-1">
           <h1 className="font-sans uppercase tracking-wider text-foreground">
-            @muybuen/scraper
+            @bueno-dev/scraper
           </h1>
           <p className="font-sans text-foreground/70">
             An API to scrape the internet. Enter a URL and optional CSS
