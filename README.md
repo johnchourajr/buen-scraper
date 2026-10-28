@@ -1,4 +1,4 @@
-# Buen Scraper API
+# Bueno Scraper API
 
 A web scraping API that allows you to extract content from web pages using CSS selectors.
 
