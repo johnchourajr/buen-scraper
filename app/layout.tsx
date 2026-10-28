@@ -9,7 +9,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://scraper.muybuen.dev"),
-  title: "Buen Scraper",
+  title: "Bueno Scraper",
   description: "An API to Scrape the internet",
 };
 
